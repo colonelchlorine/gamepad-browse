@@ -1,24 +1,33 @@
 {
-  "name": "Gamepad Browse",
-  "version": "1.0.0",
-  "description": "Use a gamepad to browse the internet",
-  "author": "Mike Murkovic",
-  "manifest_version": 1,
-  "short_name": "Gamepad Browse",
-  "background": {
-    "scripts": ["gamepad.js"],
-    "persistent": false
-  },
-  "commands": {
-    
-  },
-  "browser_action": {
-    "default_icon": "icon16.png"
-  },
-  "icons": {
-    "16": "icon16.png",
-    "32": "icon32.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
-  }
+	"name": "Gamepad Browse",
+	"version": "1.0.0",
+	"description": "Use a gamepad to browse the internet",
+	"author": "Mike Murkovic",
+	"manifest_version": 1,
+	"short_name": "Gamepad Browse",
+	"background": {
+		"scripts": ["background.js"],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"all_frames": true,
+			"js": ["gamepad.js"],
+			"matches": ["http://*/*", "https://*/*", "ftp://*/*"],
+			"exclude_globs": ["*.pdf*"],
+			"run_at": "document_start"
+		}
+	],
+	"commands": {
+		
+	},
+	"browser_action": {
+		"default_icon": "icon16.png"
+	},
+	"icons": {
+		"16": "icon16.png",
+		"32": "icon32.png",
+		"48": "icon48.png",
+		"128": "icon128.png"
+	}
 }
