@@ -5,6 +5,9 @@ class GamepadBrowse {
 	private view: HTMLElement;	
 	private padIndex: number;
 	private frame: number;
+	private disabled: boolean = false;
+	private AXES_THRESHOLD = 0.1;
+	private SCROLL_EXPONENT = 6;
 
 	constructor(view: HTMLElement) {
 		this.view = view;
@@ -27,6 +30,13 @@ class GamepadBrowse {
 	}
 
 	gameLoop() {
+		let done = () => this.frame = window.requestAnimationFrame(() => this.gameLoop());
+
+		if (this.disabled) {
+			done();
+			return;
+		}
+
 		// Check for active buttons
 		for (let i = 0, j = this.pad.buttons.length; i < j; i++) {
 			let btn = this.pad.buttons[i];
@@ -37,11 +47,13 @@ class GamepadBrowse {
 			}
 		}
 
+		// Update the axes in the state
 		this.state.axes = this.pad.axes;
 
-		this.updateStateView();
-		
-		this.frame = window.requestAnimationFrame(() => this.gameLoop());
+		// Update UI
+		this.updateWindowState();
+
+		done();
 	}
 
 	get pad(): Gamepad {
@@ -52,9 +64,24 @@ class GamepadBrowse {
 		return button.pressed || (<any>button).touched || <any>button == 1;
 	}
 
-	updateStateView() {
+	updateWindowState() {
 		let btns = this.state.getButtonsPressed();
 		this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.state.axes.join(",")}`;
+
+		// Start scrolling?
+		let yStick = this.state.axes[3];
+		if (Math.abs(yStick) > this.AXES_THRESHOLD) {
+			let posNeg = (this.state.axes[3] > 0 ? 1 : -1),
+				adjustment = Math.pow(yStick + posNeg, this.SCROLL_EXPONENT);
+			window.scroll(window.scrollX, window.scrollY + (posNeg * adjustment));
+		}
+
+		// Xbox "B" button for going back. Pause controller input for a sec
+		if (this.state.getButtonsPressed()[Button.Button2]) {
+			this.disabled = true;
+			window.history.go(-1);
+			setTimeout(() => this.disabled = false, 1000);
+		}
 	}
 }
 
