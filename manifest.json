@@ -6,13 +6,13 @@
 	"manifest_version": 2,
 	"short_name": "Gamepad Browse",
 	"background": {
-		"scripts": ["background.js"],
+		"scripts": ["src/background.js"],
 		"persistent": false
 	},
 	"content_scripts": [
 		{
 			"all_frames": true,
-			"js": ["gamepad.js"],
+			"js": ["src/gamepad.js"],
 			"matches": ["http://*/*", "https://*/*", "ftp://*/*"],
 			"exclude_globs": ["*.pdf*"],
 			"run_at": "document_start"
