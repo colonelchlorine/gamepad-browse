@@ -2,12 +2,15 @@
 
 class GamepadBrowse {
 	private state: ControllerState;
-	private view: HTMLElement;	
+	private view: HTMLElement;
+	private cursorEl: HTMLElement;
+	private cursorTimeout: number;
 	private padIndex: number;
 	private frame: number;
 	private disabled: boolean = false;
 	private AXES_THRESHOLD = 0.1;
 	private SCROLL_EXPONENT = 6;
+	private CURSOR_EXPONENT = 4;
 
 	constructor(view: HTMLElement) {
 		let debugView = document.createElement("div");
@@ -19,9 +22,23 @@ class GamepadBrowse {
 		debugView.style.background = "lightgreen";
 		debugView.style.color = "white";
 
+		let cursor = document.createElement("div");
+		cursor.style.background = "#000000";
+		cursor.style.width = "20px";
+		cursor.style.height = "20px";
+		cursor.style.borderRadius = "10px";
+		cursor.style.top = ((window.innerHeight / 2) - 10) + "px";
+		cursor.style.left = ((window.innerWidth / 2) - 10) + "px";
+		cursor.style.display = "none";
+		cursor.style.zIndex = "9999";
+		cursor.style.position = "fixed";
+		cursor.style.opacity = "0.5";
+
 		document.body.appendChild(debugView);
+		document.body.appendChild(cursor);
 		
 		this.view = debugView;
+		this.cursorEl = cursor;
 		this.state = new ControllerState();
 		window.addEventListener("gamepadconnected", (e: GamepadEvent) => this.connect(e));
 		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.connect(e));
@@ -77,6 +94,7 @@ class GamepadBrowse {
 
 	updateWindowState() {
 		let btns = this.state.getButtonsPressed();
+
 		if (this.view) {
 			this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.state.axes.join(",")}`;
 		}
@@ -87,6 +105,50 @@ class GamepadBrowse {
 			let posNeg = (this.state.axes[3] > 0 ? 1 : -1),
 				adjustment = Math.pow(yRightStick + posNeg, this.SCROLL_EXPONENT);
 			window.scroll(window.scrollX, window.scrollY + (posNeg * adjustment));
+		}
+
+		// Aiming
+		let xLeftStick = this.state.axes[0],
+			yLeftStick = this.state.axes[1];
+		if (Math.abs(xLeftStick) > this.AXES_THRESHOLD || Math.abs(yLeftStick) > this.AXES_THRESHOLD) {
+			// Display it
+			clearTimeout(this.cursorTimeout);
+			this.cursorTimeout = null;
+			this.cursorEl.style.display = "inline-block";
+
+			// Calculate new position
+			let xPosNeg = (xLeftStick > 0 ? 1 : -1),
+				yPosNeg = (yLeftStick > 0 ? 1 : -1),
+				xAdjustment = Math.pow(xLeftStick + xPosNeg, this.CURSOR_EXPONENT),
+				yAdjustment = Math.pow(yLeftStick + yPosNeg, this.CURSOR_EXPONENT);
+
+			let newX = parseFloat(this.cursorEl.style.left.replace("px", "")) + (xPosNeg * xAdjustment);
+			newX = Math.min(Math.max(0, newX), window.innerWidth);
+
+			let newY = parseFloat(this.cursorEl.style.top.replace("px", "")) + (yPosNeg * yAdjustment);
+			newY = Math.min(Math.max(0, newY), window.innerHeight);
+
+			// Update position
+			this.cursorEl.style.left = newX + "px";
+			this.cursorEl.style.top = newY + "px";
+		} else {
+			// Set to be hidden after some time
+			if (!this.cursorTimeout && this.cursorEl.style.display !== "none") {
+				clearTimeout(this.cursorTimeout);
+				this.cursorTimeout = setTimeout(() => this.cursorEl.style.display = "none", 3000);
+			}
+		}
+
+		// Xbox "A" for "clicking"
+		if (btns[Button.Button1]) {
+			let x = parseFloat(this.cursorEl.style.left.replace("px", "")) + 10,
+				y = parseFloat(this.cursorEl.style.top.replace("px", "")) + 10;	
+			
+			this.cursorEl.style.display = "none";
+			
+			click(x, y);
+
+			this.cursorEl.style.display = "inline-block";
 		}
 
 		// Xbox "B" button for going back. Pause controller input for a sec
@@ -105,6 +167,7 @@ class GamepadBrowse {
 			return;
 		}
 	}
+
 	private changeHistory = debounce((direction) => window.history.go(direction), 1000);
 	
 	private focusTab = debounce((btns: Button) => {
@@ -157,6 +220,20 @@ function debounce(method: Function, delay: Number) {
 			method.apply(this, args);
 		}
 	}
+}
+
+function click(x,y){
+    var ev = document.createEvent("MouseEvent");
+    var el = document.elementFromPoint(x,y);
+    ev.initMouseEvent(
+        "click",
+        true /* bubble */, true /* cancelable */,
+        window, null,
+        x, y, 0, 0, /* coordinates */
+        false, false, false, false, /* modifier keys */
+        0 /*left*/, null
+    );
+    el.dispatchEvent(ev);
 }
 
 enum Button {
