@@ -6,7 +6,6 @@ npm install .
 
 TODO
 =====
-- Get this running as a chrome extension. For now testing on index.html is fine
 - Switch tabs with the top left/right bumper buttons
 - Navigate & highlight anchor tags with the bottom left/right bumpers
 - Click "A" to fire onclick event on those anchors

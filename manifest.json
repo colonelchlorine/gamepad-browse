@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "Use a gamepad to browse the internet",
 	"author": "Mike Murkovic",
-	"manifest_version": 1,
+	"manifest_version": 2,
 	"short_name": "Gamepad Browse",
 	"background": {
 		"scripts": ["background.js"],

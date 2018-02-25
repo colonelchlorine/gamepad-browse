@@ -10,7 +10,18 @@ class GamepadBrowse {
 	private SCROLL_EXPONENT = 6;
 
 	constructor(view: HTMLElement) {
-		this.view = view;
+		let debugView = document.createElement("div");
+		debugView.style.position = "fixed";
+		debugView.style.left = "0px";
+		debugView.style.bottom = "0px";
+		debugView.style.width = "100%";
+		debugView.style.height = "30px";
+		debugView.style.background = "lightgreen";
+		debugView.style.color = "white";
+
+		document.body.appendChild(debugView);
+		
+		this.view = debugView;
 		this.state = new ControllerState();
 		window.addEventListener("gamepadconnected", (e: GamepadEvent) => this.connect(e));
 		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.connect(e));
@@ -66,7 +77,9 @@ class GamepadBrowse {
 
 	updateWindowState() {
 		let btns = this.state.getButtonsPressed();
-		this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.state.axes.join(",")}`;
+		if (this.view) {
+			this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.state.axes.join(",")}`;
+		}
 
 		// Start scrolling?
 		let yStick = this.state.axes[3];
@@ -77,10 +90,18 @@ class GamepadBrowse {
 		}
 
 		// Xbox "B" button for going back. Pause controller input for a sec
-		if (this.state.getButtonsPressed()[Button.Button2]) {
+		if (btns[Button.Button2] || btns[Button.DPadLeft]) {
 			this.disabled = true;
 			window.history.go(-1);
 			setTimeout(() => this.disabled = false, 1000);
+			return;
+		}
+
+		if (btns[Button.DPadRight]) {
+			this.disabled = true;
+			window.history.go(1);
+			setTimeout(() => this.disabled = false, 1000);
+			return;
 		}
 	}
 }
