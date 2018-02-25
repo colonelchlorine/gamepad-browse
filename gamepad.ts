@@ -82,28 +82,36 @@ class GamepadBrowse {
 		}
 
 		// Start scrolling?
-		let yStick = this.state.axes[3];
-		if (Math.abs(yStick) > this.AXES_THRESHOLD) {
+		let yRightStick = this.state.axes[3];
+		if (Math.abs(yRightStick) > this.AXES_THRESHOLD) {
 			let posNeg = (this.state.axes[3] > 0 ? 1 : -1),
-				adjustment = Math.pow(yStick + posNeg, this.SCROLL_EXPONENT);
+				adjustment = Math.pow(yRightStick + posNeg, this.SCROLL_EXPONENT);
 			window.scroll(window.scrollX, window.scrollY + (posNeg * adjustment));
 		}
 
 		// Xbox "B" button for going back. Pause controller input for a sec
 		if (btns[Button.Button2] || btns[Button.DPadLeft]) {
-			this.disabled = true;
-			window.history.go(-1);
-			setTimeout(() => this.disabled = false, 1000);
+			this.changeHistory(-1);
 			return;
 		}
 
 		if (btns[Button.DPadRight]) {
-			this.disabled = true;
-			window.history.go(1);
-			setTimeout(() => this.disabled = false, 1000);
+			this.changeHistory(1);
+			return;
+		}
+
+		if (btns[Button.ShoulderTopRight] || btns[Button.ShoulderTopLeft]) {
+			this.focusTab(btns);
 			return;
 		}
 	}
+	private changeHistory = debounce((direction) => window.history.go(direction), 1000);
+	
+	private focusTab = debounce((btns: Button) => {
+		return chrome.runtime.sendMessage({ action: "TabSwitch", data: { move: btns[Button.ShoulderTopRight] ? "next" : "prev" } }, function (response) {
+			console.log("???", response);
+		});
+	}, 1000);
 }
 
 class ControllerState {
@@ -134,6 +142,19 @@ class ControllerState {
 	release(type: Button) {
 		if (this.buttonsPressed[type]) {
 			delete this.buttonsPressed[type];
+		}
+	}
+}
+
+function debounce(method: Function, delay: Number) {
+	let timeout;
+	return (...args) => {
+		let callIt = !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(() => timeout = null, delay);
+
+		if (callIt) {
+			method.apply(this, args);
 		}
 	}
 }
