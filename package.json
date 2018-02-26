@@ -1,0 +1,32 @@
+{
+  "name": "gamepad-browse",
+  "version": "1.0.0",
+  "description": "Browse internet with a gamepad",
+  "main": "background.js",
+  "dependencies": {
+    "webpack": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.59",
+    "@types/gamepad": "0.0.28",
+    "copy-webpack-plugin": "^4.4.2",
+    "file-loader": "^1.1.9",
+    "ts-loader": "^4.0.0",
+    "typescript": "^2.7.2",
+    "webpack-cli": "^2.0.9"
+  },
+  "scripts": {
+    "build": "webpack --mode=development",
+    "watch": "webpack --watch --mode=development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/mikemurko/gamepad-browse.git"
+  },
+  "author": "Mike Murkovic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/mikemurko/gamepad-browse/issues"
+  },
+  "homepage": "https://gitlab.com/mikemurko/gamepad-browse#README"
+}
