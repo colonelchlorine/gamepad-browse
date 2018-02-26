@@ -1,5 +1,5 @@
 import ControllerState from "./controllerState";
-import { Button, debounce, click } from "./utils";
+import { Button, MessageRequestAction, debounce, click } from "./utils";
 
 export default class GamepadBrowse {
 	private state: ControllerState;
@@ -172,7 +172,7 @@ export default class GamepadBrowse {
 	private changeHistory = debounce((direction) => window.history.go(direction), 1000);
 	
 	private focusTab = debounce((btns: Button) => {
-		return chrome.runtime.sendMessage({ action: "TabSwitch", data: { move: btns[Button.ShoulderTopRight] ? "next" : "prev" } }, function (response) {
+		return chrome.runtime.sendMessage({ action: MessageRequestAction.TabSwitch, data: { move: btns[Button.ShoulderTopRight] ? "next" : "prev" } }, function (response) {
 			console.log("???", response);
 		});
 	}, 1000);

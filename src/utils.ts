@@ -44,3 +44,7 @@ export enum Button {
 	DPadRight = 15,
 	Vendor = 16
 }
+
+export enum MessageRequestAction {
+	TabSwitch = "TabSwitch"
+}
