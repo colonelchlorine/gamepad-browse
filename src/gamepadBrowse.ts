@@ -12,7 +12,7 @@ export default class GamepadBrowse {
 	private AXES_THRESHOLD = 0.1;
 	private SCROLL_EXPONENT = 6;
 	private CURSOR_EXPONENT = 4;
-
+	
 	constructor(view: HTMLElement) {
 		let debugView = document.createElement("div");
 		debugView.style.position = "fixed";
@@ -42,7 +42,7 @@ export default class GamepadBrowse {
 		this.cursorEl = cursor;
 		this.state = new ControllerState();
 		window.addEventListener("gamepadconnected", (e: GamepadEvent) => this.connect(e));
-		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.connect(e));
+		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.disconnect(e));
 	}
 
 	connect(e) {
@@ -53,7 +53,7 @@ export default class GamepadBrowse {
 		this.gameLoop();
 	}
 
-	disconnect() {
+	disconnect(e) {
 		window.cancelAnimationFrame(this.frame);
 		this.padIndex = null;
 	}

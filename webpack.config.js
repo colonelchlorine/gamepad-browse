@@ -3,6 +3,8 @@ let CopyWebpackPlugin = require('copy-webpack-plugin');
 let webpack = require("webpack");
 
 module.exports = {
+	mode: "development",
+	devtool: 'none',
 	entry: {
 		background: './src/background.ts',
 		gamepad: './src/gamepad.ts'
