@@ -46,5 +46,6 @@ export enum Button {
 }
 
 export enum MessageRequestAction {
-	TabSwitch = "TabSwitch"
+	TabSwitch = "TabSwitch",
+	Reload = "Reload"
 }

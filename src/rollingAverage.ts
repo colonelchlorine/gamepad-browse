@@ -14,8 +14,7 @@ export default class RollingAverage {
       return;
     }
 
-    // WRONG: Getting jumbled results
-    this.avg += ((this.smoothingFactor * newVal) + (1 - this.smoothingFactor) * this.avg);
+    this.avg = ((this.smoothingFactor * newVal) + (1 - this.smoothingFactor) * this.avg);
   }
 
   get average() { return this.avg; }

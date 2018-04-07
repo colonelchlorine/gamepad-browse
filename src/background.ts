@@ -32,10 +32,12 @@ function addGamepadToTab(tab) {
 }
 
 function handleRequest(request): Promise<string> {
-	
 	return new Promise<string>((resolve, reject) => {
 		console.log(request.action, "ACTION??");
 		switch (request.action) {
+			case MessageRequestAction.Reload:
+				chrome.runtime.reload();
+				resolve();
 			case MessageRequestAction.TabSwitch:
 				if (request.data && request.data.move == "next") {
 					chrome.windows.getLastFocused({ populate: true }, (window) => {

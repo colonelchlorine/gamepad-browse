@@ -1,10 +1,13 @@
 import ControllerState from "./controllerState";
 import { Button, MessageRequestAction, debounce, click } from "./utils";
+import { toggleDebug, log } from "./log";
 
 export default class GamepadBrowse {
-	private state: ControllerState;
+	private controller: ControllerState;
 	private view: HTMLElement;
 	private cursorEl: HTMLElement;
+	private bodyEl: HTMLElement = document.getElementsByTagName("body")[0];
+	private htmlEl: HTMLElement = document.getElementsByTagName("html")[0];
 	private cursorTimeout: number;
 	private padIndex: number;
 	private frame: number;
@@ -20,7 +23,7 @@ export default class GamepadBrowse {
 		debugView.style.bottom = "0px";
 		debugView.style.width = "100%";
 		debugView.style.height = "30px";
-		debugView.style.background = "lightgreen";
+		debugView.style.background = "purple";
 		debugView.style.color = "white";
 
 		let cursor = document.createElement("div");
@@ -40,22 +43,43 @@ export default class GamepadBrowse {
 		
 		this.view = debugView;
 		this.cursorEl = cursor;
-		this.state = new ControllerState();
+		this.controller = new ControllerState();
 		window.addEventListener("gamepadconnected", (e: GamepadEvent) => this.connect(e));
 		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.disconnect(e));
+		this.htmlEl.addEventListener("mousemove", (e: MouseEvent) => { 
+			this.showBrowserCursor();
+		});
 	}
 
 	connect(e) {
 		this.padIndex = e.gamepad.index;
-		console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
+		log("Gamepad connected at index %d: %s. %d buttons, %d axes.", this.padIndex, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
 		window.cancelAnimationFrame(this.frame);
-		this.state.resetAxes(this.pad.axes)
+		this.hideBrowserCursor();
 		this.gameLoop();
 	}
 
 	disconnect(e) {
 		window.cancelAnimationFrame(this.frame);
+		this.showBrowserCursor();
 		this.padIndex = null;
+	}
+
+	showBrowserCursor() {
+		if (!this.htmlEl.style.cursor.includes("default")) {
+			log("Show browser cursor");
+			this.htmlEl.style.cursor = "default";
+		}
+	}
+
+	hideBrowserCursor() {
+		// This doesn't even really work. If you hide the cursor
+		// but it's not being touched - it just stayed on the screen :(
+		// Probably need to just delete this code ....
+		if (!this.htmlEl.style.cursor.includes("none")) {
+			log("Hide browser cursor");
+			this.htmlEl.style.cursor = "none";
+		}
 	}
 
 	gameLoop() {
@@ -70,14 +94,14 @@ export default class GamepadBrowse {
 		for (let i = 0, j = this.pad.buttons.length; i < j; i++) {
 			let btn = this.pad.buttons[i];
 			if (this.isPressed(btn)) {
-				this.state.press(btn, Button[Button[i]]);
+				this.controller.press(btn, Button[Button[i]]);
 			} else {
-				this.state.release(Button[Button[i]]);
+				this.controller.release(Button[Button[i]]);
 			}
 		}
 
 		// Update the axes in the state
-		this.state.axes = this.pad.axes;
+		this.controller.axes = this.pad.axes;
 
 		// Update UI
 		this.updateWindowState();
@@ -94,23 +118,29 @@ export default class GamepadBrowse {
 	}
 
 	updateWindowState() {
-		let btns = this.state.getButtonsPressed();
+		let btns = this.controller.getButtonsPressed();
+		let htmlCursorThreshold = 0.05;
+
+		// Any scrolling or buttons pressing should hide the cursor again
+		if (Math.max.apply(Math, this.controller.axes) > htmlCursorThreshold || Object.keys(btns).length > 0) {
+			this.hideBrowserCursor();
+		}	
 
 		if (this.view) {
-			this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.state.axes.join(",")}`;
+			this.view.innerHTML = `Buttons pressed: ${Object.keys(btns).map(key => Button[key] + " " + btns[key].value).join(",")}; Axes: ${this.controller.axes.join(",")}`;
 		}
 
 		// Start scrolling?
-		let yRightStick = this.state.axes[3];
+		let yRightStick = this.controller.axes[3];
 		if (Math.abs(yRightStick) > this.AXES_THRESHOLD) {
-			let posNeg = (this.state.axes[3] > 0 ? 1 : -1),
+			let posNeg = (this.controller.axes[3] > 0 ? 1 : -1),
 				adjustment = Math.pow(yRightStick + posNeg, this.SCROLL_EXPONENT);
 			window.scroll(window.scrollX, window.scrollY + (posNeg * adjustment));
 		}
 
 		// Aiming
-		let xLeftStick = this.state.axes[0],
-			yLeftStick = this.state.axes[1];
+		let xLeftStick = this.controller.axes[0],
+			yLeftStick = this.controller.axes[1];
 		if (Math.abs(xLeftStick) > this.AXES_THRESHOLD || Math.abs(yLeftStick) > this.AXES_THRESHOLD) {
 			// Display it
 			clearTimeout(this.cursorTimeout);
@@ -166,6 +196,20 @@ export default class GamepadBrowse {
 		if (btns[Button.ShoulderTopRight] || btns[Button.ShoulderTopLeft]) {
 			this.focusTab(btns);
 			return;
+		}
+
+		// TODO: Use Select / Start option to bring up
+		// A "Menu" which gives options on what you'd like to do
+		// "Restart", "Toggle debug", etc, etc
+
+		if (btns[Button.Select]) {
+			toggleDebug();
+		}
+
+		if (btns[Button.Start]) {
+			chrome.runtime.sendMessage({ action: MessageRequestAction.Reload }, () => {
+				window.location.reload();
+			});
 		}
 	}
 
