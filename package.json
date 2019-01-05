@@ -13,7 +13,7 @@
     "file-loader": "^1.1.9",
     "ts-loader": "^4.0.0",
     "typescript": "^2.7.2",
-    "webpack-cli": "^2.0.9"
+    "webpack-cli": "^3.2.0"
   },
   "scripts": {
     "build": "webpack --mode=development",
