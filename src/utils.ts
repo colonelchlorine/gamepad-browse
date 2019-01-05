@@ -11,9 +11,9 @@ export function debounce(method: Function, delay: Number) {
 	}
 }
 
-export function click(x,y){
+export function click(x, y){
     var ev = document.createEvent("MouseEvent");
-    var el = document.elementFromPoint(x,y);
+    var el = document.elementFromPoint(x, y);
     ev.initMouseEvent(
         "click",
         true /* bubble */, true /* cancelable */,
