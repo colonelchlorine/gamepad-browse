@@ -2,6 +2,16 @@
 Comfortably browse Chrome with a gaming controller instead of a mouse and keyboard
 
 ## How to run
-- npm install .
-- npm build watch (if CLI) or can run VSCode build task "npm: watch". Any TS code updates build into the /dist directory
+
+For development (combined w/ webpack & watcher):
+- npm i .
+- npm run start
+
+For production (minified w/ webpack):
+- npm i
+- npm run build
+
+Outputs go to the /dist directory for both.
+
+To try out in Chrome:
 - chrome://extensions and load unpacked extension. target the /dist directory and it should work
