@@ -1,5 +1,10 @@
-# Gamepad Browse
+<h1>
+  <img alt="Gamepad Browse" src="icon48.png" width="48" />
+  Gamepad Browse
+</h1>
+
 Comfortably browse Chrome with a gaming controller instead of a mouse and keyboard
+
 
 ## How to run
 
