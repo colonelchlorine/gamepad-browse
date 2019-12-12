@@ -1,18 +1,14 @@
-import Controller from "./controller";
-import { Button, MessageRequestAction, debounce, click } from "./utils";
-import { toggleDebug, log } from "./log";
+import { log } from "./log";
 import ControllerManager from "./controllerManager";
 
 export default class GamepadBrowse {
 	private view: HTMLElement;
-	private controllerView: ControllerManager;
-	private bodyEl: HTMLElement = document.getElementsByTagName("body")[0];
-	private htmlEl: HTMLElement = document.getElementsByTagName("html")[0];
+	private controllerManager: ControllerManager;
 	private padIndex: number;
 	private frame: number;
 	private disabled: boolean = false;
 
-	constructor(view: HTMLElement) {
+	constructor() {
 		let debugView = document.createElement("div");
 		
 		debugView.style.position = "fixed";
@@ -39,37 +35,32 @@ export default class GamepadBrowse {
 		document.body.appendChild(cursor);
 		
 		this.view = debugView;
-		this.controllerView = new ControllerManager(this.view, cursor);
+		this.controllerManager = new ControllerManager(this.view, cursor);
 		window.addEventListener("gamepadconnected", (e: GamepadEvent) => this.connect(e));
 		window.addEventListener("gamepaddisconnected", (e: GamepadEvent) => this.disconnect(e));
 	}
 
-	connect(e) {
+	connect(e: GamepadEvent) {
 		this.padIndex = e.gamepad.index;
 		log("Gamepad connected at index %d: %s. %d buttons, %d axes.", this.padIndex, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
 		window.cancelAnimationFrame(this.frame);
+		this.disabled = false;
 		this.gameLoop();
 	}
 
-	disconnect(e) {
+	disconnect(e: GamepadEvent) {
 		window.cancelAnimationFrame(this.frame);
+		this.disabled = true;
 		this.padIndex = null;
 	}
 
 	gameLoop() {
-		let done = () => this.frame = window.requestAnimationFrame(() => this.gameLoop());
-
 		if (this.disabled) {
-			done();
 			return;
 		}
 
-		this.controllerView.run(this.pad);
+		this.controllerManager.run(navigator.getGamepads()[this.padIndex]);
 
-		done();
-	}
-
-	get pad(): Gamepad {
-		return navigator.getGamepads()[this.padIndex];
+		this.frame = window.requestAnimationFrame(() => this.gameLoop());
 	}
 }
