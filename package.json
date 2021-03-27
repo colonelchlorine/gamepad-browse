@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "Browse internet with a gamepad",
   "main": "background.js",
-  "dependencies": {
-    "webpack": "^4.41.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chrome": "0.0.59",
     "@types/gamepad": "0.0.28",
-    "copy-webpack-plugin": "^5.1.0",
-    "file-loader": "^1.1.9",
-    "ts-loader": "^4.0.0",
-    "typescript": "^2.7.2",
-    "webpack-cli": "^3.3.10"
+    "copy-webpack-plugin": "~8.1.0",
+    "file-loader": "~6.2.0",
+    "ts-loader": "~4.0.0",
+    "typescript": "~4.2.3",
+    "webpack": "~5.1.0",
+    "webpack-cli": "~4.5.0"
   },
   "scripts": {
     "start": "webpack --watch --mode=development",

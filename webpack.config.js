@@ -4,7 +4,6 @@ let webpack = require("webpack");
 
 module.exports = {
 	mode: "development",
-	devtool: 'none',
 	entry: {
 		background: './src/background.ts',
 		gamepad: './src/gamepad.ts'
@@ -21,17 +20,21 @@ module.exports = {
     ]
   },
 	plugins: [
-		new CopyWebpackPlugin([
-			{
-				from: './manifest.json'
-			},
-			{
-				from: './*.png'
-			}
-		]),
-		new webpack.WatchIgnorePlugin([
-			/\.js$/,
-			/\.d\.ts$/
-		])
+		new CopyWebpackPlugin({
+			patterns: [
+				{
+					from: './manifest.json'
+				},
+				{
+					from: './*.png'
+				}
+			]
+		}),
+		new webpack.WatchIgnorePlugin({
+			paths: [
+				/\.js$/,
+				/\.d\.ts$/
+			]
+		})
 	]
 };

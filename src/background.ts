@@ -37,7 +37,7 @@ function handleRequest(request): Promise<string> {
 		switch (request.action) {
 			case MessageRequestAction.Reload:
 				chrome.runtime.reload();
-				resolve();
+				resolve("Reload");
 			case MessageRequestAction.TabSwitch:
 				if (request.data && request.data.move == "next") {
 					chrome.windows.getLastFocused({ populate: true }, (window) => {
