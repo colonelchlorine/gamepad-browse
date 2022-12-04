@@ -5,14 +5,14 @@
   "main": "background.js",
   "dependencies": {},
   "devDependencies": {
-    "@types/chrome": "0.0.59",
-    "@types/gamepad": "0.0.28",
-    "copy-webpack-plugin": "~8.1.0",
+    "@types/chrome": "0.0.203",
+    "@types/gamepad": "1.5.0",
+    "copy-webpack-plugin": "~11.0.0",
     "file-loader": "~6.2.0",
-    "ts-loader": "~4.0.0",
-    "typescript": "~4.2.3",
-    "webpack": "~5.1.0",
-    "webpack-cli": "~4.5.0"
+    "ts-loader": "~9.4.2",
+    "typescript": "~4.9.3",
+    "webpack": "~5.75.0",
+    "webpack-cli": "~5.0.0"
   },
   "scripts": {
     "start": "webpack --watch --mode=development",
